@@ -33,6 +33,15 @@ export class PlayersService {
     }
   }
 
+  async deletePlayer(email: string): Promise<void> {
+    const playerExists = this.players.find((e) => email === e.email);
+    if (playerExists) {
+      this.players = this.players.filter((j) => j.email !== playerExists.email);
+    } else {
+      throw new NotFoundException(`player whith email: ${email} not found.`);
+    }
+  }
+
   private update(playerExists: Player, createPlayerDto: CreatePlayerDto): void {
     const { name } = createPlayerDto;
     playerExists.name = name;
