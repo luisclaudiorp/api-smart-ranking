@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { CreatePlayerDto } from './dtos/create-player.dto';
 import { Player } from './interfaces/player.interface';
 import { v4 as uuidv4 } from 'uuid';
@@ -10,7 +10,32 @@ export class PlayersService {
   private readonly logger = new Logger(PlayersService.name);
 
   async createUpdatePlayer(createPlayerDto: CreatePlayerDto): Promise<void> {
-    this.create(createPlayerDto);
+    const { email } = createPlayerDto;
+
+    const playerExists = this.players.find((e) => email === e.email);
+    if (playerExists) {
+      this.update(playerExists, createPlayerDto);
+    } else {
+      this.create(createPlayerDto);
+    }
+  }
+
+  async getAllPlayers(): Promise<Player[]> {
+    return this.players;
+  }
+
+  async getPlayersEmail(email: string): Promise<Player[]> {
+    const playerExists = this.players.find((e) => email === e.email);
+    if (playerExists) {
+      return [playerExists];
+    } else {
+      throw new NotFoundException(`player whith email: ${email} not found.`);
+    }
+  }
+
+  private update(playerExists: Player, createPlayerDto: CreatePlayerDto): void {
+    const { name } = createPlayerDto;
+    playerExists.name = name;
   }
 
   private create(createPlayerDto: CreatePlayerDto): void {
